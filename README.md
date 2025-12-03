@@ -14,7 +14,6 @@ Instances do **not use public IPs**. Instead, access is provided securely via **
 aws-asg-alb-private-ssm/
 ├── README.md                # Main project guide
 ├── images/                  # screnshots of creating resources
-├── diagrams/
 ├── stress-test.sh           # Helper commands for CPU load testing
 
 ```
@@ -77,6 +76,8 @@ aws-asg-alb-private-ssm/
    - Name: `demo-vpc`
    - IPv4 CIDR: `10.0.0.0/16`
 4. Create.
+
+![VPC Created](images/vpc-created.png)
 
 ---
 
@@ -158,6 +159,8 @@ Now:
 4. Name: `EC2-SSM-Role`.
 5. Create role.
 
+![IAM Role](images/iam-role.png)
+
 This role allows EC2 instances to register with **Systems Manager**.
 
 ---
@@ -220,6 +223,8 @@ EOF
 
 Create the launch template.
 
+![Launch Template](images/launch-template.png)
+
 ---
 
 ### 9️⃣ Create Target Group
@@ -236,6 +241,8 @@ Create the launch template.
 
 Leave it empty; the ASG will register instances automatically.
 
+![Target Group](images/target-group.png)
+
 ---
 
 ### 🔟 Create Application Load Balancer (ALB)
@@ -251,6 +258,8 @@ Leave it empty; the ASG will register instances automatically.
 8. Listener:
    - HTTP : 80 → default action: **Forward to `tg-nginx-asg`**.
 9. Create ALB.
+
+![ALB Public](images/alb-public.png)
 
 ---
 
@@ -277,6 +286,8 @@ Leave it empty; the ASG will register instances automatically.
    - Target value: **50%**.
 8. Create Auto Scaling group.
 
+![ASG Private](images/asg-private.png)
+
 ---
 
 ## 🔍 Verify Setup
@@ -287,6 +298,8 @@ Go to **EC2 → Instances**:
 
 - You should see 2 **running** instances.
 - They are in **private subnets** (no public IP).
+
+![EC2 Instance via ASG](images/ec2-instance-via-asg.png)
 
 ---
 
@@ -316,11 +329,17 @@ http://<ALB-DNS-NAME>
 You should see the HTML page with instance hostname.  
 Refresh multiple times → hostname may change → proves load balancing.
 
+![Web Output 1](images/output-web1.png)
+
+![Web Output 2](images/output-web2.png)
+
 ---
 
 ## 🔑 Connect to EC2 Instances via SSM (No SSH Needed)
 
 This is **very important** for this lab.
+
+![Connected via SSM](images/connected-via-ssm.png)
 
 ### Requirements Recap
 
@@ -367,6 +386,9 @@ Use SSM session to generate CPU load:
 ```bash
 stress --cpu 4 --timeout 300
 ```
+![CPU Increased via Stress](images/cpu-increased-via-stress.png)
+
+![All Instances Scaled Up](images/all-instance-up.png)
 
 Then:
 
@@ -378,6 +400,7 @@ After the `stress` command completes and CPU drops:
 
 - ASG will gradually scale in (terminate extra instances) back to **min = 2**.
 
+![ASG Activity History](images/activity-history-after-cpu-50.png)
 ---
 
 ## 🧹 Cleanup
